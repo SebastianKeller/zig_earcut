@@ -1,0 +1,10 @@
+pkgs:
+  zig_earcut:
+    version: 0.0.0
+    license: ISC
+    source_url: "https://github.com/SebastianKeller/zig_earcut"
+
+    root: src/main.zig
+    files:
+      README.md
+      LICENSE
