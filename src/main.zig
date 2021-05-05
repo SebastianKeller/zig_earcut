@@ -121,7 +121,7 @@ pub fn Earcut(comptime Scalar: type) type {
             var i: usize = 0;
             while (i < data.len) : (i += 1) {
                 if (i > 0) {
-                    hole_indexes[hole_idx] = vert_idx;
+                    hole_indexes[hole_idx] = vert_idx / dim;
                     hole_idx += 1;
                 }
 
