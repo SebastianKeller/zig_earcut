@@ -17,7 +17,7 @@ test "flattening" {
         var expected = [_]Scalar{ 10, 0, 0, 50, 60, 60, 70, 10 };
 
         var flattened = try Earcut(Scalar).flatten(2, rings, std.testing.allocator);
-        std.testing.expectEqualSlices(Scalar, &expected, flattened.vertices);
+        try std.testing.expectEqualSlices(Scalar, &expected, flattened.vertices);
         flattened.deinit();
     }
 }
@@ -34,7 +34,7 @@ test "indices-2d" {
             70, 10,
         };
         var result = try earcut.earcut(&points, null, 2);
-        std.testing.expectEqualSlices(usize, result, &[_]usize{ 1, 0, 3, 3, 2, 1 });
+        try std.testing.expectEqualSlices(usize, result, &[_]usize{ 1, 0, 3, 3, 2, 1 });
     }
 }
 
@@ -50,7 +50,7 @@ test "indices-3d" {
             70, 10, 0,
         };
         var result = try earcut.earcut(&points, null, 3);
-        std.testing.expectEqualSlices(usize, result, &[_]usize{ 1, 0, 3, 3, 2, 1 });
+        try std.testing.expectEqualSlices(usize, result, &[_]usize{ 1, 0, 3, 3, 2, 1 });
     }
 }
 
