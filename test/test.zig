@@ -68,5 +68,5 @@ test "geojson" {
     var earcut = Earcut(f32).init(std.testing.allocator);
     defer earcut.deinit();
 
-    var result = try earcut.earcut(flattened.vertices, flattened.holes, 2);
+    _ = try earcut.earcut(flattened.vertices, flattened.holes, 2);
 }

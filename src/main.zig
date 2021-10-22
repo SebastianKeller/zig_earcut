@@ -231,7 +231,7 @@ pub fn Earcut(comptime Scalar: type) type {
             }
         }
 
-        fn cureLocalIntersections(self: *Self, start: *Node, triangles: *std.ArrayList(usize), dim: usize) !*Node {
+        fn cureLocalIntersections(_: *Self, start: *Node, triangles: *std.ArrayList(usize), dim: usize) !*Node {
             var s = start;
             var p = s;
             while (true) {
@@ -471,7 +471,7 @@ pub fn Earcut(comptime Scalar: type) type {
             return n;
         }
 
-        fn nodeCompare(context: void, left: *Node, right: *Node) bool {
+        fn nodeCompare(_: void, left: *Node, right: *Node) bool {
             if (left.x > right.x)
                 return false;
             return true;
