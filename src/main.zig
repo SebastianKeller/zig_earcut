@@ -35,7 +35,7 @@ pub fn Earcut(comptime Scalar: type) type {
 
         const Self = @This();
 
-        pub fn init(allocator: *std.mem.Allocator) Self {
+        pub fn init(allocator: std.mem.Allocator) Self {
             return .{
                 .arena = std.heap.ArenaAllocator.init(allocator),
             };
@@ -51,7 +51,7 @@ pub fn Earcut(comptime Scalar: type) type {
 
             const outerNode = try self.linkedList(data, 0, outerLen, dim, true);
 
-            var triangles = std.ArrayList(usize).init(&self.arena.allocator);
+            var triangles = std.ArrayList(usize).init(self.arena.allocator());
             if (outerNode == null)
                 return triangles.items;
 
@@ -95,7 +95,7 @@ pub fn Earcut(comptime Scalar: type) type {
         }
 
         pub const Flattened = struct {
-            allocator: *std.mem.Allocator,
+            allocator: std.mem.Allocator,
             vertices: []Scalar,
             holes: []usize,
             dimension: usize,
@@ -106,7 +106,7 @@ pub fn Earcut(comptime Scalar: type) type {
             }
         };
 
-        pub fn flatten(comptime dim: usize, data: [][][dim]Scalar, allocator: *std.mem.Allocator) !Flattened {
+        pub fn flatten(comptime dim: usize, data: [][][dim]Scalar, allocator: std.mem.Allocator) !Flattened {
             var vertices_count: usize = 0;
             var hole_count: usize = data.len - 1;
             for (data) |ring| {
@@ -445,7 +445,7 @@ pub fn Earcut(comptime Scalar: type) type {
         }
 
         fn eliminateHoles(self: *Self, data: []Scalar, holeIndices: []usize, outerNode: *Node, dim: usize) !*Node {
-            var queue = std.ArrayList(*Node).init(&self.arena.allocator);
+            var queue = std.ArrayList(*Node).init(self.arena.allocator());
 
             const len = holeIndices.len;
             var i: usize = 0;
@@ -512,10 +512,10 @@ pub fn Earcut(comptime Scalar: type) type {
         }
 
         fn splitPolygon(self: *Self, a: *Node, b: *Node) !*Node {
-            var a2 = try self.arena.allocator.create(Node);
+            var a2 = try self.arena.allocator().create(Node);
             a2.* = .{ .i = a.i, .x = a.x, .y = a.y, .next = a2, .prev = a2 };
 
-            var b2 = try self.arena.allocator.create(Node);
+            var b2 = try self.arena.allocator().create(Node);
             b2.* = .{ .i = b.i, .x = b.x, .y = b.y, .next = b2, .prev = b2 };
 
             var an = a.next;
@@ -638,7 +638,7 @@ pub fn Earcut(comptime Scalar: type) type {
         }
 
         fn insertNode(self: *Self, i: usize, x: Scalar, y: Scalar, last: ?*Node) !*Node {
-            var p = try self.arena.allocator.create(Node);
+            var p = try self.arena.allocator().create(Node);
 
             if (last) |v| {
                 p.* = .{ .i = i, .x = x, .y = y, .next = v.next, .prev = v };
