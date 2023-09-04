@@ -1,5 +1,5 @@
 const std = @import("std");
-const Earcut = @import("earcut").Earcut;
+const Earcut = @import("zig_earcut").Earcut;
 
 test "flattening" {
     inline for ([_]type{ f32, f64, f128 }) |Scalar| {

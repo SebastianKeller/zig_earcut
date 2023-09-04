@@ -1,21 +1,9 @@
 const std = @import("std");
 
 pub fn Earcut(comptime Scalar: type) type {
-    const Scalar_min = switch (Scalar) {
-        f16 => std.math.f16_min,
-        f32 => std.math.f32_min,
-        f64 => std.math.f64_min,
-        f128 => std.math.f128_min,
-        else => unreachable,
-    };
+    const Scalar_min = std.math.floatMin(Scalar);
 
-    const Scalar_max = switch (Scalar) {
-        f16 => std.math.f16_max,
-        f32 => std.math.f32_max,
-        f64 => std.math.f64_max,
-        f128 => std.math.f128_max,
-        else => unreachable,
-    };
+    const Scalar_max = std.math.floatMax(Scalar);
 
     const Node = struct {
         i: usize,
@@ -87,7 +75,7 @@ pub fn Earcut(comptime Scalar: type) type {
                 }
 
                 // minX, minY and size are later used to transform coords into integers for z-order calculation
-                size = std.math.max(maxX - minX, maxY - minY);
+                size = @max(maxX - minX, maxY - minY);
             }
 
             try self.earcutLinked(node, &triangles, dim, minX, minY, size, -1);
@@ -342,8 +330,8 @@ pub fn Earcut(comptime Scalar: type) type {
 
         fn zOrder(x: Scalar, y: Scalar, minX: Scalar, minY: Scalar, size: Scalar) Scalar {
             // coords are transformed into non-negative 15-bit integer range
-            var lx = @floatToInt(i32, 32767 * (x - minX) / size);
-            var ly = @floatToInt(i32, 32767 * (y - minY) / size);
+            var lx: i32 = @intFromFloat(32767 * (x - minX) / size);
+            var ly: i32 = @intFromFloat(32767 * (y - minY) / size);
 
             lx = (lx | (lx << 8)) & 0x00FF00FF;
             lx = (lx | (lx << 4)) & 0x0F0F0F0F;
@@ -355,7 +343,7 @@ pub fn Earcut(comptime Scalar: type) type {
             ly = (ly | (ly << 2)) & 0x33333333;
             ly = (ly | (ly << 1)) & 0x55555555;
 
-            return @intToFloat(Scalar, lx | (ly << 1));
+            return @as(Scalar, @floatFromInt(lx | (ly << 1)));
         }
 
         fn indexCurve(start: *Node, minX: Scalar, minY: Scalar, size: Scalar) void {
@@ -461,7 +449,7 @@ pub fn Earcut(comptime Scalar: type) type {
                 }
             }
 
-            std.sort.sort(*Node, queue.items, {}, nodeCompare);
+            std.mem.sort(*Node, queue.items, {}, nodeCompare);
 
             var n = outerNode;
             for (queue.items) |node| {
@@ -608,9 +596,9 @@ pub fn Earcut(comptime Scalar: type) type {
                     last = try self.insertNode(i, data[i], data[i + 1], last);
                 }
             } else {
-                var i = @intCast(i64, (end - dim));
-                while (i >= start) : (i -= @intCast(i64, dim)) {
-                    const idx = @intCast(usize, i);
+                var i = @as(i64, @intCast((end - dim)));
+                while (i >= start) : (i -= @as(i64, @intCast(dim))) {
+                    const idx = @as(usize, @intCast(i));
                     last = try self.insertNode(idx, data[idx], data[idx + 1], last);
                 }
             }
