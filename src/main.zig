@@ -574,7 +574,7 @@ pub fn Earcut(comptime Scalar: type) type {
 
             while (p != stop) {
                 if (hx >= p.x and p.x >= mx and pointInTriangle(if (hy < my) hx else qx, hy, mx, my, if (hy < my) qx else hx, hy, p.x, p.y)) {
-                    const tan = std.math.fabs(hy - p.y) / (hx - p.x); // tangential
+                    const tan = @abs(hy - p.y) / (hx - p.x); // tangential
 
                     if ((tan < tanMin or (tan == tanMin and p.x > m.?.x)) and locallyInside(p, hole)) {
                         m = p;
