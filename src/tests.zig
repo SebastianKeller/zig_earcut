@@ -33,7 +33,7 @@ test "indices-2d" {
             60, 60,
             70, 10,
         };
-        var result = try earcut.earcut(&points, null, 2);
+        const result = try earcut.earcut(&points, null, 2);
         try std.testing.expectEqualSlices(usize, result, &[_]usize{ 1, 0, 3, 3, 2, 1 });
     }
 }
@@ -49,7 +49,7 @@ test "indices-3d" {
             60, 60, 0,
             70, 10, 0,
         };
-        var result = try earcut.earcut(&points, null, 3);
+        const result = try earcut.earcut(&points, null, 3);
         try std.testing.expectEqualSlices(usize, result, &[_]usize{ 1, 0, 3, 3, 2, 1 });
     }
 }

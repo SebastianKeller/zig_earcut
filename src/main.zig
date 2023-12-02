@@ -96,7 +96,7 @@ pub fn Earcut(comptime Scalar: type) type {
 
         pub fn flatten(comptime dim: usize, data: [][][dim]Scalar, allocator: std.mem.Allocator) !Flattened {
             var vertices_count: usize = 0;
-            var hole_count: usize = data.len - 1;
+            const hole_count: usize = data.len - 1;
             for (data) |ring| {
                 vertices_count += ring.len * dim;
             }
@@ -223,8 +223,8 @@ pub fn Earcut(comptime Scalar: type) type {
             var s = start;
             var p = s;
             while (true) {
-                var a = p.prev;
-                var b = p.next.next;
+                const a = p.prev;
+                const b = p.next.next;
 
                 if (!equals(a, b) and intersects(a, p, p.next, b) and locallyInside(a, b) and locallyInside(b, a)) {
                     try triangles.append(a.i / dim);
@@ -246,9 +246,9 @@ pub fn Earcut(comptime Scalar: type) type {
         }
 
         fn isEar(ear: *const Node) bool {
-            var a = ear.prev;
-            var b = ear;
-            var c = ear.next;
+            const a = ear.prev;
+            const b = ear;
+            const c = ear.next;
 
             if (area(a, b, c) >= 0)
                 return false; //reflex, can't be an ear
@@ -266,9 +266,9 @@ pub fn Earcut(comptime Scalar: type) type {
         }
 
         fn isEarHashed(ear: *const Node, minX: Scalar, minY: Scalar, size: Scalar) bool {
-            var a = ear.prev;
-            var b = ear;
-            var c = ear.next;
+            const a = ear.prev;
+            const b = ear;
+            const c = ear.next;
 
             if (area(a, b, c) >= 0)
                 return false; // reflex, can't be an ear
@@ -438,9 +438,9 @@ pub fn Earcut(comptime Scalar: type) type {
             const len = holeIndices.len;
             var i: usize = 0;
             while (i < len) : (i += 1) {
-                var start = holeIndices[i] * dim;
-                var end = if (i < len - 1) holeIndices[i + 1] * dim else data.len;
-                var list = try self.linkedList(data, start, end, dim, false);
+                const start = holeIndices[i] * dim;
+                const end = if (i < len - 1) holeIndices[i + 1] * dim else data.len;
+                const list = try self.linkedList(data, start, end, dim, false);
                 if (list) |v| {
                     if (v == v.next)
                         v.steiner = true;
@@ -492,9 +492,9 @@ pub fn Earcut(comptime Scalar: type) type {
         }
 
         fn eliminateHole(self: *Self, hole: *Node, outerNode: *Node) !void {
-            var node = findHoleBridge(hole, outerNode);
+            const node = findHoleBridge(hole, outerNode);
             if (node) |n| {
-                var b = try self.splitPolygon(n, hole);
+                const b = try self.splitPolygon(n, hole);
                 _ = filterPoints(b, b.next);
             }
         }
@@ -526,8 +526,8 @@ pub fn Earcut(comptime Scalar: type) type {
 
         fn findHoleBridge(hole: *Node, outerNode: *Node) ?*Node {
             var p = outerNode;
-            var hx = hole.x;
-            var hy = hole.y;
+            const hx = hole.x;
+            const hy = hole.y;
             var qx: Scalar = -Scalar_max;
             var m: ?*Node = null;
 
@@ -536,7 +536,7 @@ pub fn Earcut(comptime Scalar: type) type {
             // segment's endpoint with lesser x will be potential connection point
             while (true) {
                 if (hy <= p.y and hy >= p.next.y) {
-                    var x = p.x + (hy - p.y) * (p.next.x - p.x) / (p.next.y - p.y);
+                    const x = p.x + (hy - p.y) * (p.next.x - p.x) / (p.next.y - p.y);
                     if (x <= hx and x > qx) {
                         qx = x;
                         if (x == hx) {
@@ -565,9 +565,9 @@ pub fn Earcut(comptime Scalar: type) type {
             // otherwise choose the point of the minimum angle with the ray as
             // connection point
 
-            var stop = m;
-            var mx = m.?.x;
-            var my = m.?.y;
+            const stop = m;
+            const mx = m.?.x;
+            const my = m.?.y;
             var tanMin: Scalar = Scalar_max;
 
             p = m.?.next;
@@ -626,7 +626,7 @@ pub fn Earcut(comptime Scalar: type) type {
         }
 
         fn insertNode(self: *Self, i: usize, x: Scalar, y: Scalar, last: ?*Node) !*Node {
-            var p = try self.arena.allocator().create(Node);
+            const p = try self.arena.allocator().create(Node);
 
             if (last) |v| {
                 p.* = .{ .i = i, .x = x, .y = y, .next = v.next, .prev = v };
@@ -677,8 +677,8 @@ pub fn Earcut(comptime Scalar: type) type {
         fn middleInside(a: *const Node, b: *const Node) bool {
             var p = a;
             var inside = false;
-            var px = (a.x + b.x) / 2;
-            var py = (a.y + b.y) / 2;
+            const px = (a.x + b.x) / 2;
+            const py = (a.y + b.y) / 2;
             while (true) {
                 if (((p.y > py) != (p.next.y > py)) and (px < (p.next.x - p.x) * (py - p.y) / (p.next.y - p.y) + p.x))
                     inside = !inside;
