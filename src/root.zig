@@ -720,3 +720,7 @@ pub fn Earcut(comptime Scalar: type) type {
         }
     };
 }
+
+test {
+    _ = @import("tests.zig");
+}
