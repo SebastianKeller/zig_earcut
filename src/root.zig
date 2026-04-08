@@ -39,7 +39,7 @@ pub fn Earcut(comptime Scalar: type) type {
 
             const outerNode = try self.linkedList(data, 0, outerLen, dim, true);
 
-            var triangles = std.ArrayList(usize).init(self.arena.allocator());
+            var triangles = std.ArrayList(usize).empty;
             if (outerNode == null)
                 return triangles.items;
 
@@ -150,9 +150,9 @@ pub fn Earcut(comptime Scalar: type) type {
                 const next = e.next;
 
                 if (if (size != Scalar_min) isEarHashed(e, minX, minY, size) else isEar(e)) {
-                    try triangles.append(prev.i / dim);
-                    try triangles.append(e.i / dim);
-                    try triangles.append(next.i / dim);
+                    try triangles.append(self.arena.allocator(), prev.i / dim);
+                    try triangles.append(self.arena.allocator(), e.i / dim);
+                    try triangles.append(self.arena.allocator(), next.i / dim);
 
                     removeNode(e);
 
@@ -196,18 +196,18 @@ pub fn Earcut(comptime Scalar: type) type {
                 var b = a.next.next;
                 while (b != a.prev) {
                     if (a.i != b.i and isValidDiagonal(a, b)) {
-                        var c = try self.splitPolygon(a, b);
+                        const c = try self.splitPolygon(a, b);
 
                         //filter colinear points around the cuts
                         var wrapper: ?*Node = a.next;
-                        a = filterPoints(a, wrapper).?;
+                        const a_filtered = filterPoints(a, wrapper);
 
                         wrapper = c.next;
-                        c = filterPoints(c, wrapper).?;
+                        const c_filtered = filterPoints(c, wrapper);
 
                         // run earcut on each half
-                        try self.earcutLinked(a, triangles, dim, minX, minY, size, -1);
-                        try self.earcutLinked(c, triangles, dim, minX, minY, size, -1);
+                        try self.earcutLinked(a_filtered, triangles, dim, minX, minY, size, -1);
+                        try self.earcutLinked(c_filtered, triangles, dim, minX, minY, size, -1);
                         return;
                     }
                     b = b.next;
@@ -219,7 +219,7 @@ pub fn Earcut(comptime Scalar: type) type {
             }
         }
 
-        fn cureLocalIntersections(_: *Self, start: *Node, triangles: *std.ArrayList(usize), dim: usize) !*Node {
+        fn cureLocalIntersections(self: *Self, start: *Node, triangles: *std.ArrayList(usize), dim: usize) !*Node {
             var s = start;
             var p = s;
             while (true) {
@@ -227,9 +227,9 @@ pub fn Earcut(comptime Scalar: type) type {
                 const b = p.next.next;
 
                 if (!equals(a, b) and intersects(a, p, p.next, b) and locallyInside(a, b) and locallyInside(b, a)) {
-                    try triangles.append(a.i / dim);
-                    try triangles.append(p.i / dim);
-                    try triangles.append(b.i / dim);
+                    try triangles.append(self.arena.allocator(), a.i / dim);
+                    try triangles.append(self.arena.allocator(), p.i / dim);
+                    try triangles.append(self.arena.allocator(), b.i / dim);
 
                     // remove two nodes involved
                     removeNode(p);
@@ -433,7 +433,7 @@ pub fn Earcut(comptime Scalar: type) type {
         }
 
         fn eliminateHoles(self: *Self, data: []Scalar, holeIndices: []usize, outerNode: *Node, dim: usize) !*Node {
-            var queue = std.ArrayList(*Node).init(self.arena.allocator());
+            var queue = std.ArrayList(*Node).empty;
 
             const len = holeIndices.len;
             var i: usize = 0;
@@ -445,7 +445,7 @@ pub fn Earcut(comptime Scalar: type) type {
                     if (v == v.next)
                         v.steiner = true;
 
-                    try queue.append(getLeftmost(v));
+                    try queue.append(self.arena.allocator(), getLeftmost(v));
                 }
             }
 
@@ -460,9 +460,7 @@ pub fn Earcut(comptime Scalar: type) type {
         }
 
         fn nodeCompare(_: void, left: *Node, right: *Node) bool {
-            if (left.x > right.x)
-                return false;
-            return true;
+            return left.x < right.x;
         }
 
         fn filterPoints(start: *Node, end: ?*Node) ?*Node {
